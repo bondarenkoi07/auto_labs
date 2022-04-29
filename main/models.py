@@ -30,12 +30,18 @@ class Moderate(User):
 
 
 class Subject(models.Model):
-    assignee = models.ForeignKey(Assignee,  on_delete=models.DO_NOTHING, verbose_name="преподаватель", null=True)
+    assignee = models.ForeignKey(
+        Assignee, on_delete=models.DO_NOTHING, verbose_name="преподаватель", null=True
+    )
     course = models.PositiveSmallIntegerField(verbose_name="курс группы")
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name="группа", null=True)
+    group = models.ForeignKey(
+        Group, on_delete=models.CASCADE, verbose_name="группа", null=True
+    )
     pass
 
 
 class Task(models.Model):
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, verbose_name="задание")
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE, verbose_name="задание"
+    )
     pass
