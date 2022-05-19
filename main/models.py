@@ -14,24 +14,21 @@ class Group(models.Model):
 class User(AbstractUser):
     username = models.TextField(verbose_name="логин", unique=True, max_length=256)
     token = models.TextField(max_length=256)
-    pass
+    ROLES = [
+        ("st", "Ученик"),
+        ("tc", "Учитель"),
+        ("md", "Модератор"),
+    ]
 
-
-class Assignee(User):
-    pass
-
-
-class Student(User):
-    pass
-
-
-class Moderate(User):
+    role = models.CharField(
+        max_length=2, choices=ROLES, default="st", verbose_name="статус пользователя"
+    )
     pass
 
 
 class Subject(models.Model):
     assignee = models.ForeignKey(
-        Assignee, on_delete=models.DO_NOTHING, verbose_name="преподаватель", null=True
+        User, on_delete=models.DO_NOTHING, verbose_name="преподаватель", null=True
     )
     course = models.PositiveSmallIntegerField(verbose_name="курс группы")
     group = models.ForeignKey(
@@ -44,4 +41,13 @@ class Task(models.Model):
     subject = models.ForeignKey(
         Subject, on_delete=models.CASCADE, verbose_name="задание"
     )
+    right_output = models.FileField(verbose_name="Тестовый список ответов")
+    input = models.FileField(verbose_name="Тестовый список входных параметров")
+    name = models.TextField(verbose_name="название репозитория (англ.)")
+    actions_file = models.FileField(verbose_name="файл с настройками проверки (.yaml)")
     pass
+
+
+class ActionFile(models.Model):
+    name = models.CharField(verbose_name="action name")
+    file = models.FileField(verbose_name="action file")

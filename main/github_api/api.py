@@ -1,3 +1,5 @@
+import base64
+
 import requests
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, JsonResponse
@@ -5,6 +7,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 
+from main.forms import UploadFileForm
 from main.github_api import RoleDict, BASE
 
 
@@ -75,7 +78,7 @@ def create_repo(request: HttpRequest, repo_name: str) -> HttpResponse:
 
 
 def add_collaborator(
-    request: HttpRequest, repo_name: str, owner: str, collaborator_name: str, role: str
+        request: HttpRequest, repo_name: str, owner: str, collaborator_name: str, role: str
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -101,11 +104,11 @@ def add_collaborator(
 
 
 def create_branch(
-    request: HttpRequest,
-    repo_name: str,
-    owner: str,
-    target_branch: str,
-    parent_branch: str,
+        request: HttpRequest,
+        repo_name: str,
+        owner: str,
+        target_branch: str,
+        parent_branch: str,
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -145,11 +148,11 @@ def create_branch(
 
 
 def commit_file(
-    request: HttpRequest, repo_name: str, owner: str, target_branch: str
+        request: HttpRequest, repo_name: str, target_branch: str
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
-
+    owner = request.user.username
     if owner == "":
         return JsonResponse({"error": "No noticed owner"})
 
@@ -180,7 +183,7 @@ def commit_file(
         # add blobs for files
         r = requests.post(
             f"https://api.github.com/repos/{owner}/{repo_name}/git/blobs",
-            json={"content": f.read(), "encoding": "utf-8",},
+            json={"content": f.read(), "encoding": "utf-8", },
             headers=headers,
         )
 
@@ -232,3 +235,48 @@ def commit_file(
         json={"ref": f"refs/heads/{target_branch}", "sha": new_commit_sha},
         headers=headers,
     )
+
+
+def create_or_update_content(request: HttpRequest, repo_name: str) -> HttpResponse:
+    if repo_name == "":
+        return redirect("create-repo")
+
+    form = UploadFileForm(request.POST, request.FILES)
+
+    if form.is_valid():
+
+        data = {}
+
+        r = requests.get(
+            f"https://api.github.com/repos/{request.user.username}/{repo_name}/{form.file.name}",
+            headers={
+                "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+                "Accept": "application/vnd.github.v3+json",
+            },
+        )
+
+        if r.status_code == 200:
+            data["sha"] = r.json()['sha']
+
+        message = form.file.read()
+        message_bytes = message.encode('utf-8')
+        message_base64_bytes = base64.b64encode(message_bytes)
+        message_base64 = message_base64_bytes.decode('utf-8')
+
+        data['message']= f"upload file {form.file.name}"
+        data['content'] = message_base64
+        r = requests.put(
+            f"https://api.github.com/repos/{request.user.username}/{repo_name}/{form.file.name}",
+            headers={
+                "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+                "Accept": "application/vnd.github.v3+json",
+            },
+            json=data
+        )
+
+        if r.status_code != 200:
+            HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'), data=r.json())
+
+        return redirect('task-status')
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
