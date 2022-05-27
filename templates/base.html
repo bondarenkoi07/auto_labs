@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+
+    <link rel="shortcut icon" href="https://static.tildacdn.com/img/tildafavicon.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" >
+    <title>{% block title %}Анкета{% endblock title %}</title>
+    <style>
+        td{
+            max-width: 400px;
+        }
+        .center {
+          margin-left: auto;
+          margin-right: auto;
+        }
+        nav{
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+<script>
+
+     $(document).ready(function(){
+        $('.dropdown-toggle').dropdown()
+    });
+</script>
+<header class=" container-fluid bg-dark ">
+        <div class="row">
+            <div class="col-3">
+                 <img src="https://static.tildacdn.com/tild3538-3830-4330-b263-656161333633/tild6633-3433-4230-a.png" class="" imgfield="img" style="max-width: 250px;width: 250px; height: auto; display: block;" alt="">
+            </div>
+            <div class="col-9 inline-group text-center" >
+                <a href="{% url 'company-list' %}" class=" btn btn-sm btn-outline-danger active">Компании</a>
+                <a href="{% url 'employee-list' %}" class="btn btn-sm btn-outline-danger active">Сотрудники</a>
+                <a href="{% url 'task-not-complete' %}" class="btn btn-sm btn-outline-danger active">Актуальные Задания</a>
+                <div class="dropdown d-inline">
+                    <button class="btn btn-sm btn-danger dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Ещё
+                    </button>
+                    <div class="dropdown-menu " aria-labelledby="dropdownMenuButton">
+                        <a href="{% url 'login' %}" class="dropdown-item">Войти</a>
+                        <a href="{% url 'logout' %}" class="dropdown-item">Выйти</a>
+                        <a href="{% url 'company-outsource' %}" class="dropdown-item">Аутсорс</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <div>
+            <div class="col">
+
+            </div>
+            <div class="row">
+                <div class="col align-content-center" align="center">
+                    <h1>
+                        {% block h1 %}
+                            Задания
+                        {% endblock h1 %}
+                    </h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                {% block error %}
+                {% endblock error %}
+            </div>
+            <div class="col-8 align-content-center border border-dark p-3 m-3 text-wrap text-break">
+            {% block main %}
+
+            {% endblock main %}
+            </div>
+        <div class="col">
+        {% block message %}
+        {% endblock message %}
+        </div>
+    </div>
+</div>
+
+    <footer></footer>
+</body>
+</html>

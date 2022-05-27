@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 
 
-class SettingsBackend(BaseBackend):
+class GithubBackend(BaseBackend):
     """
     Authenticate against the settings ADMIN_LOGIN and ADMIN_PASSWORD.
 

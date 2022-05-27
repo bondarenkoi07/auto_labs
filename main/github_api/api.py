@@ -46,6 +46,7 @@ def callback(request: HttpRequest) -> HttpResponse:
             "https://github.com/login/oauth/access_token", data=data, headers=header
         )
         auth_token = response.json()
+        a
         request.session["GITHUB_TOKEN"] = auth_token["access_token"]
         return redirect("account")
     else:
@@ -78,7 +79,7 @@ def create_repo(request: HttpRequest, repo_name: str) -> HttpResponse:
 
 
 def add_collaborator(
-        request: HttpRequest, repo_name: str, owner: str, collaborator_name: str, role: str
+    request: HttpRequest, repo_name: str, owner: str, collaborator_name: str, role: str
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -104,11 +105,11 @@ def add_collaborator(
 
 
 def create_branch(
-        request: HttpRequest,
-        repo_name: str,
-        owner: str,
-        target_branch: str,
-        parent_branch: str,
+    request: HttpRequest,
+    repo_name: str,
+    owner: str,
+    target_branch: str,
+    parent_branch: str,
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -148,7 +149,7 @@ def create_branch(
 
 
 def commit_file(
-        request: HttpRequest, repo_name: str, target_branch: str
+    request: HttpRequest, repo_name: str, target_branch: str
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -183,7 +184,7 @@ def commit_file(
         # add blobs for files
         r = requests.post(
             f"https://api.github.com/repos/{owner}/{repo_name}/git/blobs",
-            json={"content": f.read(), "encoding": "utf-8", },
+            json={"content": f.read(), "encoding": "utf-8",},
             headers=headers,
         )
 
@@ -256,27 +257,27 @@ def create_or_update_content(request: HttpRequest, repo_name: str) -> HttpRespon
         )
 
         if r.status_code == 200:
-            data["sha"] = r.json()['sha']
+            data["sha"] = r.json()["sha"]
 
         message = form.file.read()
-        message_bytes = message.encode('utf-8')
+        message_bytes = message.encode("utf-8")
         message_base64_bytes = base64.b64encode(message_bytes)
-        message_base64 = message_base64_bytes.decode('utf-8')
+        message_base64 = message_base64_bytes.decode("utf-8")
 
-        data['message']= f"upload file {form.file.name}"
-        data['content'] = message_base64
+        data["message"] = f"upload file {form.file.name}"
+        data["content"] = message_base64
         r = requests.put(
             f"https://api.github.com/repos/{request.user.username}/{repo_name}/{form.file.name}",
             headers={
                 "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
                 "Accept": "application/vnd.github.v3+json",
             },
-            json=data
+            json=data,
         )
 
         if r.status_code != 200:
-            HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'), data=r.json())
+            HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"), data=r.json())
 
-        return redirect('task-status')
+        return redirect("task-status")
 
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
