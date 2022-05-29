@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
 {% block main%}
     <div>
-        <h2>{{ object.name }}</h2>
-        <p>Задание: {{ object.description }}</p>
-        <p>Отправить выполненное задание</p>
         {% if not form is None %}
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}

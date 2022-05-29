@@ -36,17 +36,16 @@
                  <img src="https://static.tildacdn.com/tild3538-3830-4330-b263-656161333633/tild6633-3433-4230-a.png" class="" imgfield="img" style="max-width: 250px;width: 250px; height: auto; display: block;" alt="">
             </div>
             <div class="col-9 inline-group text-center" >
-                <a href="{% url 'company-list' %}" class=" btn btn-sm btn-outline-danger active">Компании</a>
-                <a href="{% url 'employee-list' %}" class="btn btn-sm btn-outline-danger active">Сотрудники</a>
-                <a href="{% url 'task-not-complete' %}" class="btn btn-sm btn-outline-danger active">Актуальные Задания</a>
+                <a href="{% url 'group-list' %}" class=" btn btn-sm btn-outline-danger active">Группы</a>
+                <a href="{% url 'action-list' %}" class=" btn btn-sm btn-outline-danger active">Группы</a>
+                <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-danger active">Сотрудники</a>
+                <a href="{% url 'subjects' %}" class="btn btn-sm btn-outline-danger active">Актуальные Задания</a>
                 <div class="dropdown d-inline">
                     <button class="btn btn-sm btn-danger dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Ещё
                     </button>
                     <div class="dropdown-menu " aria-labelledby="dropdownMenuButton">
                         <a href="{% url 'login' %}" class="dropdown-item">Войти</a>
-                        <a href="{% url 'logout' %}" class="dropdown-item">Выйти</a>
-                        <a href="{% url 'company-outsource' %}" class="dropdown-item">Аутсорс</a>
                     </div>
                 </div>
             </div>

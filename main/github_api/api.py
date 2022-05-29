@@ -1,14 +1,18 @@
 import base64
+from typing import Any
 
 import requests
+from django.contrib.auth import authenticate
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, JsonResponse
 from django.conf import settings
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_exempt
+from requests import Response
 
 from main.forms import UploadFileForm
 from main.github_api import RoleDict, BASE
+from main.models import User
 
 
 def url_encode(url: str, kwargs: dict[str, str]) -> str:
@@ -46,7 +50,6 @@ def callback(request: HttpRequest) -> HttpResponse:
             "https://github.com/login/oauth/access_token", data=data, headers=header
         )
         auth_token = response.json()
-        a
         request.session["GITHUB_TOKEN"] = auth_token["access_token"]
         return redirect("account")
     else:
@@ -61,25 +64,41 @@ def user_info(request: HttpRequest) -> HttpResponse:
             "Accept": "application/vnd.github.v3+json",
         },
     )
-    return JsonResponse(r.json())
+
+    username = r.json()['login']
+    token = request.session["GITHUB_TOKEN"]
+
+    user = authenticate(request=request, username=username, auth_token=token)
+    if user is not None:
+        login(request=request, user=user)
+        return render(request=request, template_name="detail/user.html", context=r.json())
 
 
-def create_repo(request: HttpRequest, repo_name: str) -> HttpResponse:
-    if repo_name == "":
-        return redirect("create-repo")
+def create_repo(request: HttpRequest, repo_name: str) -> Response:
     r = requests.post(
         "https://api.github.com/user/repos",
         headers={
-            "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+            "Authorization": "token %s" % request.user.token,
             "Accept": "application/vnd.github.v3+json",
         },
         json={"name": repo_name},
     )
-    return JsonResponse(r.json())
+    return r
+
+
+def is_repo_exists(request: HttpRequest, repo_name: str) -> bool:
+    r = requests.get(
+        f"https://api.github.com/repos/{request.user.username}/{repo_name}",
+        headers={
+            "Authorization": "token %s" % request.user.token,
+            "Accept": "application/vnd.github.v3+json",
+        }
+    )
+    return r.status_code == 200
 
 
 def add_collaborator(
-    request: HttpRequest, repo_name: str, owner: str, collaborator_name: str, role: str
+        request: HttpRequest, repo_name: str, owner: str, collaborator_name: str, role: str
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -105,11 +124,11 @@ def add_collaborator(
 
 
 def create_branch(
-    request: HttpRequest,
-    repo_name: str,
-    owner: str,
-    target_branch: str,
-    parent_branch: str,
+        request: HttpRequest,
+        repo_name: str,
+        owner: str,
+        target_branch: str,
+        parent_branch: str,
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -149,7 +168,7 @@ def create_branch(
 
 
 def commit_file(
-    request: HttpRequest, repo_name: str, target_branch: str
+        request: HttpRequest, repo_name: str, target_branch: str
 ) -> HttpResponse:
     if repo_name == "":
         return JsonResponse({"error": "No matching repository"})
@@ -184,7 +203,7 @@ def commit_file(
         # add blobs for files
         r = requests.post(
             f"https://api.github.com/repos/{owner}/{repo_name}/git/blobs",
-            json={"content": f.read(), "encoding": "utf-8",},
+            json={"content": f.read(), "encoding": "utf-8", },
             headers=headers,
         )
 
@@ -238,11 +257,9 @@ def commit_file(
     )
 
 
-def create_or_update_content(request: HttpRequest, repo_name: str) -> HttpResponse:
+def create_or_update_content(request: HttpRequest, repo_name: str, form: UploadFileForm) -> Any:
     if repo_name == "":
         return redirect("create-repo")
-
-    form = UploadFileForm(request.POST, request.FILES)
 
     if form.is_valid():
 
@@ -269,7 +286,7 @@ def create_or_update_content(request: HttpRequest, repo_name: str) -> HttpRespon
         r = requests.put(
             f"https://api.github.com/repos/{request.user.username}/{repo_name}/{form.file.name}",
             headers={
-                "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+                "Authorization": "token %s" % request.user.token,
                 "Accept": "application/vnd.github.v3+json",
             },
             json=data,
@@ -281,3 +298,18 @@ def create_or_update_content(request: HttpRequest, repo_name: str) -> HttpRespon
         return redirect("task-status")
 
     return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
+
+
+def get_last_pipeline(request: HttpRequest, repo_name: str, workflow_id: str):
+    if repo_name == "":
+        return {"error": "repo not chosen"}
+
+    owner = request.user.username
+
+    r = requests.post(
+        f"https://api.github.com/repos/{owner}/{repo_name}/actions/workflows/{workflow_id}?per_page=1",
+        headers={"Authorization": "token %s" % request.user.token,
+                 "Accept": "application/vnd.github.v3+json", },
+    )
+
+    return r.json()

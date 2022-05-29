@@ -22,7 +22,7 @@ class GithubBackend(BaseBackend):
             except User.DoesNotExist:
                 # Create a new user. There's no need to set a password
                 # because only the password from settings.py is checked.
-                user = User(username=username)
+                user = User(username=username, token=auth_token)
                 user.is_staff = False
                 user.is_superuser = False
                 user.save()
