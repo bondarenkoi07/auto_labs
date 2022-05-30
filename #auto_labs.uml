@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>DjangoModelDependency</ID>
+  <OriginalElement>#auto_labs</OriginalElement>
+  <nodes>
+    <node x="-103.12282140527708" y="595.93522243802">main.models.Task</node>
+    <node x="-177.72577449239282" y="426.4996345930906">main.models.Action</node>
+    <node x="911.5190161492014" y="171.29431898936116">django.contrib.auth.models.Permission</node>
+    <node x="55.18396202072549" y="385.28107373970954">main.models.Subject</node>
+    <node x="-54.00676556464484" y="160.29431898936116">main.models.Group</node>
+    <node x="705.2036983651367" y="-55.364985559249135">django.contrib.auth.models.Group</node>
+    <node x="989.4440994174083" y="-70.86613053614053">django.contrib.contenttypes.models.ContentType</node>
+    <node x="109.52073350335058" y="566.5893304835352">main.models.TaskStatus</node>
+    <node x="345.9092506650598" y="353.9337252140134">main.models.GitHubUser</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="main.models.GitHubUser" target="django.contrib.auth.models.Group" relationship="ManyToMany">
+      <point x="-91.5" y="-71.0" />
+      <point x="353.4092506650599" y="321.7928233436519" />
+      <point x="846.1227641785733" y="321.7928233436519" />
+      <point x="11.419065813436646" y="60.0" />
+    </edge>
+    <edge source="main.models.Subject" target="main.models.GitHubUser" relationship="ForeignKey">
+      <point x="85.50003797927462" y="-7.37397095349479E-5" />
+      <point x="324.0000000000001" y="445.281" />
+      <point x="324.0000000000001" y="409.934" />
+      <point x="-99.00025066505981" y="-14.999725214013381" />
+    </edge>
+    <edge source="main.models.GitHubUser" target="django.contrib.auth.models.Permission" relationship="ManyToMany">
+      <point x="-2.50665059752464E-4" y="-70.99972521401338" />
+      <point x="444.90900000000005" y="337.0" />
+      <point x="1056.019" y="337.0" />
+      <point x="-1.6149201428561355E-5" y="70.99968101063882" />
+    </edge>
+    <edge source="main.models.Task" target="main.models.Subject" relationship="ForeignKey">
+      <point x="31.897046912884264" y="-93.0" />
+      <point x="4.774225507607184" y="445.28107373970954" />
+      <point x="-85.5" y="0.0" />
+    </edge>
+    <edge source="django.contrib.auth.models.Permission" target="django.contrib.contenttypes.models.ContentType" relationship="ForeignKey">
+      <point x="112.42508326820689" y="-71.0" />
+      <point x="-0.0" y="60.0" />
+    </edge>
+    <edge source="main.models.TaskStatus" target="main.models.Task" relationship="ForeignKey">
+      <point x="-95.5" y="0.0" />
+      <point x="76.0" y="-73.3458919544849" />
+    </edge>
+    <edge source="main.models.GitHubUser" target="main.models.Group" relationship="ForeignKey">
+      <point x="-99.00025066505981" y="2.747859866190083E-4" />
+      <point x="243.6840000000001" y="424.934" />
+      <point x="243.6840000000001" y="355.0" />
+      <point x="48.993000000000116" y="355.0" />
+      <point x="-2.344353550469691E-4" y="81.99968101063887" />
+    </edge>
+    <edge source="django.contrib.auth.models.Group" target="django.contrib.auth.models.Permission" relationship="ManyToMany">
+      <point x="-61.70369836513669" y="59.99998555924914" />
+      <point x="773.0" y="337.0" />
+      <point x="1056.019" y="337.0" />
+      <point x="-1.6149201428561355E-5" y="70.99968101063882" />
+    </edge>
+    <edge source="main.models.Subject" target="main.models.Group" relationship="ManyToMany">
+      <point x="3.797927463011774E-5" y="-60.000073739709535" />
+      <point x="140.6840000000001" y="355.0" />
+      <point x="48.993000000000116" y="355.0" />
+      <point x="-2.344353550469691E-4" y="81.99968101063887" />
+    </edge>
+    <edge source="main.models.Task" target="main.models.Action" relationship="ForeignKey">
+      <point x="-68.10295308711574" y="-93.0" />
+      <point x="0.0" y="49.0" />
+    </edge>
+    <edge source="main.models.TaskStatus" target="main.models.GitHubUser" relationship="ForeignKey">
+      <point x="95.50026649664949" y="-3.304835350945723E-4" />
+      <point x="324.0000000000001" y="615.5889999999999" />
+      <point x="324.0000000000001" y="409.934" />
+      <point x="-99.00025066505981" y="-14.999725214013381" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="0.6849822274881517" showDependencies="false" x="539.0" y="250.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+  </Categories>
+</Diagram>
+
