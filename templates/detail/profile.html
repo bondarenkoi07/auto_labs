@@ -1,10 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends 'base.html' %}
+{% block main%}
+    <div>
+        <table>
+            <tr>
+                <td class="fw-bold">Имя пользователя:</td><td>
+                {% if not  object.username is None %}
+                {{ object.username }}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Роль:</td>
+                <td>
+                    {% if not  object.role is None %}
+                    {{ object.role_verbose }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+        <tr>
+            <td class="fw-bold">Группа:</td><td>
+            {% if not  object.group is None %}
+               М{{ object.group.faculty }}{{ object.group.studing_form }}- {{ object.group.coures }}{{ object.group.number }}-{{ object.group.year }}
+            {% else %}
+                        -
+            {% endif %}
+        </td>
+        </tr>
+        </table>
+    </div>
+{% endblock main %}

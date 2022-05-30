@@ -3,12 +3,20 @@
     <div>
         <h2>{{ object.name }}</h2>
         <p>Задание: {{ object.description }}</p>
-        <p>Отправить выполненное задание</p>
+        <p>
+        Статус: {%  if status == "" %}
+            {{ status }}
+        {% else %}
+            нет данных
+        {% endif %}
+        </p>
         {% if not form is None %}
-        <form method="post" enctype="multipart/form-data">
+            <p> Загрузить:</p>
+        <form method="post" action="{% url 'send-file' object.pk%}" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Отправить" class=" btn btn-outline-primary active"/>
         </form>
+    {% endif %}
     </div>
 {% endblock main %}

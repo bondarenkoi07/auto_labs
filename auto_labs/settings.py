@@ -27,8 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'main.User'
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,7 +36,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "main",
 ]
+
+LOGIN_REDIRECT_URL = "/profile/"
+
+AUTH_USER_MODEL = "main.GitHubUser"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -53,19 +56,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = "auto_labs.urls"
 
 TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.jinja2.Jinja2",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [os.path.join(BASE_DIR, "templates")],
@@ -134,3 +124,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 GITHUB_OAUTH_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_OAUTH_SECRET = os.getenv("GITHUB_OAUTH_SECRET")
+
+AUTHENTICATION_BACKENDS = ['main.auth-backend.GithubBackend']

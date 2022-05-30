@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
-{% load static %}
 <head>
     <meta charset="utf-8">
 
     <link rel="shortcut icon" href="https://static.tildacdn.com/img/tildafavicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <link href="{% static 'css/style.css' %}" rel="stylesheet" >
     <title>{% block title %}Анкета{% endblock title %}</title>
     <style>
         td{
@@ -25,7 +23,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 <script>
-
      $(document).ready(function(){
         $('.dropdown-toggle').dropdown()
     });
@@ -33,15 +30,15 @@
 <header class=" container-fluid bg-dark ">
         <div class="row">
             <div class="col-3">
-                 <img src="https://static.tildacdn.com/tild3538-3830-4330-b263-656161333633/tild6633-3433-4230-a.png" class="" imgfield="img" style="max-width: 250px;width: 250px; height: auto; display: block;" alt="">
+                 <img  src="https://lms.mai.ru/pluginfile.php/1/theme_moove/logo/1648140562/logo-mai-2016-feb-100x100.png" height="50px" width="50px" style="max-width: 50px;width: 50px; height: auto; display: block;" alt="MAI">
             </div>
             <div class="col-9 inline-group text-center" >
-                <a href="{% url 'group-list' %}" class=" btn btn-sm btn-outline-danger active">Группы</a>
-                <a href="{% url 'action-list' %}" class=" btn btn-sm btn-outline-danger active">Группы</a>
-                <a href="{% url 'profile' %}" class="btn btn-sm btn-outline-danger active">Сотрудники</a>
-                <a href="{% url 'subjects' %}" class="btn btn-sm btn-outline-danger active">Актуальные Задания</a>
+                <a href="{% url 'list-group' %}" class=" btn btn-sm btn-outline-primary active">Группы</a>
+                <a href="{% url 'list-action' %}" class=" btn btn-sm btn-outline-primary active">Конфигурации</a>
+                <a href="{% url 'list-subject' %}" class="btn btn-sm btn-outline-primary active">Предметы</a>
+                 <a href="{% url 'list-task' %}" class="btn btn-sm btn-outline-primary active">Задания</a>
                 <div class="dropdown d-inline">
-                    <button class="btn btn-sm btn-danger dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Ещё
                     </button>
                     <div class="dropdown-menu " aria-labelledby="dropdownMenuButton">
