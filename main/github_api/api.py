@@ -2,17 +2,17 @@ import base64
 from typing import Any
 
 import requests
+from django.contrib import auth
 from django.contrib.auth import authenticate
-from django.core.files.uploadedfile import UploadedFile
-from django.http import HttpResponseRedirect, HttpResponse, HttpRequest, JsonResponse
+from django.http import HttpResponse, HttpRequest, JsonResponse, HttpResponseRedirect
 from django.conf import settings
-from django.shortcuts import redirect, render
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect
+from django.urls import reverse
 from requests import Response
 
 from main.forms import UploadFileForm
 from main.github_api import RoleDict, BASE
-from main.models import User
+from main.models import GitHubUser
 
 
 def url_encode(url: str, kwargs: dict[str, str]) -> str:
@@ -51,27 +51,26 @@ def callback(request: HttpRequest) -> HttpResponse:
         )
         auth_token = response.json()
         request.session["GITHUB_TOKEN"] = auth_token["access_token"]
-        return redirect("account")
+        r = requests.get(
+            "https://api.github.com/user",
+            headers={
+                "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+                "Accept": "application/vnd.github.v3+json",
+            },
+        )
+
+        username = r.json()["login"]
+        token = request.session["GITHUB_TOKEN"]
+
+        user = authenticate(request=request, username=username, auth_token=token)
+        if user is not None:
+            auth.login(request=request, user=user)
+            print(user.pk)
+            return HttpResponseRedirect(reverse("profile", args=[user.pk]))
+        else:
+            return redirect("login")
     else:
-        return redirect("auth-login")
-
-
-def user_info(request: HttpRequest) -> HttpResponse:
-    r = requests.get(
-        "https://api.github.com/user",
-        headers={
-            "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
-            "Accept": "application/vnd.github.v3+json",
-        },
-    )
-
-    username = r.json()['login']
-    token = request.session["GITHUB_TOKEN"]
-
-    user = authenticate(request=request, username=username, auth_token=token)
-    if user is not None:
-        login(request=request, user=user)
-        return render(request=request, template_name="detail/user.html", context=r.json())
+        return redirect("login")
 
 
 def create_repo(request: HttpRequest, repo_name: str) -> Response:
@@ -92,7 +91,7 @@ def is_repo_exists(request: HttpRequest, repo_name: str) -> bool:
         headers={
             "Authorization": "token %s" % request.user.token,
             "Accept": "application/vnd.github.v3+json",
-        }
+        },
     )
     return r.status_code == 200
 
@@ -232,7 +231,7 @@ def commit_file(
 
     tree_sha = r.json()["sha"]
 
-    # create commit
+    # form commit
     r = requests.post(
         f"https://api.github.com/repos/{owner}/{repo_name}/git/commits",
         json={
@@ -257,9 +256,11 @@ def commit_file(
     )
 
 
-def create_or_update_content(request: HttpRequest, repo_name: str, form: UploadFileForm) -> Any:
+def create_or_update_content(
+        request: HttpRequest, repo_name: str, form: UploadFileForm
+) -> str:
     if repo_name == "":
-        return redirect("create-repo")
+        return "create-repo"
 
     if form.is_valid():
 
@@ -293,11 +294,9 @@ def create_or_update_content(request: HttpRequest, repo_name: str, form: UploadF
         )
 
         if r.status_code != 200:
-            HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"), data=r.json())
+            return r.json()["message"]
 
-        return redirect("task-status")
-
-    return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
+    return "ok"
 
 
 def get_last_pipeline(request: HttpRequest, repo_name: str, workflow_id: str):
@@ -308,8 +307,10 @@ def get_last_pipeline(request: HttpRequest, repo_name: str, workflow_id: str):
 
     r = requests.post(
         f"https://api.github.com/repos/{owner}/{repo_name}/actions/workflows/{workflow_id}?per_page=1",
-        headers={"Authorization": "token %s" % request.user.token,
-                 "Accept": "application/vnd.github.v3+json", },
+        headers={
+            "Authorization": "token %s" % request.user.token,
+            "Accept": "application/vnd.github.v3+json",
+        },
     )
 
-    return r.json()
+    return r

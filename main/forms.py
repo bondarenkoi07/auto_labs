@@ -10,18 +10,14 @@ class UploadFileForm(forms.Form):
 
 class ActionFileForm(forms.ModelForm):
     class Meta:
-        model = ActionFile
-        fields = [
-            "*"
-        ]
+        model = Action
+        fields = "__all__"
 
 
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = [
-            "*"
-        ]
+        fields = "__all__"
         widgets = {
             "description": forms.Textarea,
         }
@@ -29,20 +25,16 @@ class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
         self.fields["subject"].widget = forms.RadioSelect()
-        self.fields["subject"].queryset = Task.objects.all()
+        self.fields["subject"].queryset = Subject.objects.all()
 
 
 class SubjectForm(forms.ModelForm):
     class Meta:
-        model = Task
-        fields = [
-            "*"
-        ]
+        model = Subject
+        fields = "__all__"
 
 
 class GroupForm(forms.ModelForm):
     class Meta:
-        model = Task
-        fields = [
-            "*"
-        ]
+        model = Group
+        fields = "__all__"

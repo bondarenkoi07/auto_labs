@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Предметы{% endblock title %}
+{% block h1%}
+    Предметы
+{% endblock h1 %}
+{% block main %}
+    <table class="m-3">
+    <tr><th>Предмет</th><th>Название работы</th><th></th></tr>
+    {% for subject in object_list %}
+
+          <tr>
+                <td>
+                  {% if subject.name != '' %}
+                      {% else %}
+                  {% endif %}
+                </td>
+                <td>
+                  {{ subject.name }}
+                </td>
+                <td>
+                    <a href="{% url 'read-subject' subject.pk %}" class="btn btn-outline-danger btn active">
+                        Подробнее
+                    </a>
+                </td>
+          </tr>
+
+    {% empty %}
+          <li>Пока нет заданий.</li>
+    {% endfor %}
+    </table>
+    <p><a href="{% url 'create-subject' %}" class="btn btn-outline-danger btn active">Добавить новое задание</a></p>
+{% endblock main %}
