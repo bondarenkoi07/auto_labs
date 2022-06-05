@@ -12,7 +12,6 @@ jobs:
     - name: Python Linter
       uses: sunnysid3up/python-linter@master
       with:
-         source: "src"
          mypy-options: "--ignore-missing-imports --show-error-codes"
          isort-options: "-w 100"
          django: true
