@@ -3,13 +3,13 @@ from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.views.generic import UpdateView
 
-from main import models
+import main.models
 from main.forms import *
 from main.github_api.api import *
 
 
 class User(UpdateView):
-    model = models.GitHubUser
+    model = GitHubUser
     template_name = "form/user.html"
 
     def get_success_url(self):
@@ -17,7 +17,7 @@ class User(UpdateView):
 
 
 class Group(UpdateView):
-    model = models.Group
+    model = main.models.Group
     form_class = GroupForm
     template_name = "form/group.html"
 
@@ -26,7 +26,7 @@ class Group(UpdateView):
 
 
 class Task(UpdateView):
-    model = models.Task
+    model = main.models.Task
     form_class = TaskForm
     template_name = "form/task.html"
 
@@ -35,7 +35,7 @@ class Task(UpdateView):
 
 
 class Action(UpdateView):
-    model = models.Action
+    model = main.models.Action
     form_class = SubjectForm
     template_name = "form/action.html"
 
@@ -44,7 +44,7 @@ class Action(UpdateView):
 
 
 class Subject(UpdateView):
-    model = models.Subject
+    model = main.models.Subject
     form_class = SubjectForm
     template_name = "form/subject.html"
 
@@ -56,7 +56,7 @@ class Subject(UpdateView):
 def update_task(request: HttpRequest, tid: int):
     if request.user.role != "st":
         return redirect("main")
-    task = models.Task.objects.get(id=tid)
+    task = main.models.Task.objects.get(id=tid)
     form = UploadFileForm(request.POST, request.FILES)
 
     if not form.is_valid():
