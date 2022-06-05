@@ -12,11 +12,22 @@
         </p>
         {% if not form is None %}
             <p> Загрузить:</p>
-        <form method="post" action="{% url 'send-file' object.pk%}" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Отправить" class=" btn btn-outline-primary active"/>
-        </form>
-    {% endif %}
+            <form method="post" action="{% url 'send-file' object.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Отправить" class=" btn btn-outline-primary active"/>
+            </form>
+        {% endif %}
     </div>
 {% endblock main %}
+{% block error %}
+    {% if request.session.error_old is not None %}
+        <div class="alert alert-danger" role="alert">
+            {{ request.session.error_old }}
+        </div>
+    {% else %}
+        <div class="alert alert-success" role="alert">
+            Целостность вашего ответа не нарушена!
+        </div>
+    {% endif %}
+{% endblock error %}

@@ -3,13 +3,13 @@ from django.utils.decorators import method_decorator
 from django.utils.text import slugify
 from django.views.generic import UpdateView
 
-from main.github_api.api import *
 from main import models
+from main.forms import *
+from main.github_api.api import *
 
 
 class User(UpdateView):
     model = models.GitHubUser
-    form_class = UserForm
     template_name = "form/user.html"
 
     def get_success_url(self):
@@ -78,11 +78,34 @@ def update_task(request: HttpRequest, tid: int):
             request.session["error_old"] = res
             return redirect(task)
 
+        actform = UploadFileForm()
+        actform.file = task.input.file
+        actform.title = task.input.name
+
+        res = create_or_update_content(
+            request=request, repo_name=slugify(task.name), form=actform
+        )
+
+        if res != "ok":
+            request.session["error_old"] = res
+            return redirect(task)
+
+        actform = UploadFileForm()
+        actform.file = task.output.file
+        actform.title = task.output.name
+
+        res = create_or_update_content(
+            request=request, repo_name=slugify(task.name), form=actform
+        )
+
+        if res != "ok":
+            request.session["error_old"] = res
+            return redirect(task)
+
     res = create_or_update_content(
         request=request, repo_name=slugify(task.name), form=form
     )
     if res != "ok":
         request.session["error_old"] = res
-        return redirect(task)
 
-    return redirect(task)
+    return reverse("read-subject", kwargs={"pk": task.pk})
