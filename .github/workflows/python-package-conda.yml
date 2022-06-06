@@ -10,9 +10,10 @@ jobs:
 
     steps:
     - name: Python Linter
-      run: python -m pip install --upgrade pip
-           pip install black[d]
-           black .
+      run: |
+          python -m pip install --upgrade pip
+          pip install black[d]
+          black .
           
         
 
