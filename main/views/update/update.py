@@ -1,6 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from django.utils.text import slugify
 from django.views.generic import UpdateView
 
 import main.models
@@ -36,7 +34,7 @@ class Task(UpdateView):
 
 class Action(UpdateView):
     model = main.models.Action
-    form_class = SubjectForm
+    form_class = ActionFileForm
     template_name = "form/action.html"
 
     def get_success_url(self):
@@ -52,60 +50,58 @@ class Subject(UpdateView):
         return reverse("read-subject", kwargs={"pk": self.object.pk})
 
 
-@method_decorator(login_required)
+@login_required
 def update_task(request: HttpRequest, tid: int):
     if request.user.role != "st":
-        return redirect("main")
+        return HttpResponseRedirect(reverse("main"))
     task = main.models.Task.objects.get(id=tid)
     form = UploadFileForm(request.POST, request.FILES)
 
     if not form.is_valid():
-        return redirect(task)
+        return HttpResponseRedirect(reverse("read-task", kwargs={"pk": task.pk}))
 
     if not is_repo_exists(request, slugify(task.name)):
         res = create_repo(request, slugify(task.name))
-        if res.status_code != 200:
+        if res.status_code != 201:
+            print(res.status_code)
             request.session["error_old"] = res.json()["message"]
-            return redirect(task)
-        actform = UploadFileForm()
-        actform.file = task.actions_file.file
-        actform.title = "test.yml"
-        res = create_or_update_content(
-            request=request, repo_name=slugify(task.name), form=actform
-        )
+            return HttpResponseRedirect(reverse("read-task", kwargs={"pk": task.pk}))
 
-        if res != "ok":
-            request.session["error_old"] = res
-            return redirect(task)
+    file = task.actions_file.file
 
-        actform = UploadFileForm()
-        actform.file = task.input.file
-        actform.title = task.input.name
+    res = create_or_update_action(
+        request=request, repo_name=slugify(task.name), file=file
+    )
 
-        res = create_or_update_content(
-            request=request, repo_name=slugify(task.name), form=actform
-        )
+    if res != "ok":
+        request.session["error_old"] = res + " action file"
+        return HttpResponseRedirect(reverse("read-task", kwargs={"pk": task.pk}))
 
-        if res != "ok":
-            request.session["error_old"] = res
-            return redirect(task)
-
-        actform = UploadFileForm()
-        actform.file = task.output.file
-        actform.title = task.output.name
-
-        res = create_or_update_content(
-            request=request, repo_name=slugify(task.name), form=actform
-        )
-
-        if res != "ok":
-            request.session["error_old"] = res
-            return redirect(task)
+    file = task.input.file
 
     res = create_or_update_content(
-        request=request, repo_name=slugify(task.name), form=form
+        request=request, repo_name=slugify(task.name), file=file
+    )
+
+    if res != "ok":
+        request.session["error_old"] = res + " input file"
+        return HttpResponseRedirect(reverse("read-task", kwargs={"pk": task.pk}))
+
+    file = task.output.file
+    res = create_or_update_content(
+        request=request, repo_name=slugify(task.name), file=file
+    )
+
+    if res != "ok":
+        request.session["error_old"] = res + " output file"
+        return HttpResponseRedirect(reverse("read-task", kwargs={"pk": task.pk}))
+
+    res = create_or_update_content(
+        request=request, repo_name=slugify(task.name), file=request.FILES['file']
     )
     if res != "ok":
         request.session["error_old"] = res
+    else:
+        request.session["error_old"] = None
 
-    return reverse("read-subject", kwargs={"pk": task.pk})
+    return HttpResponseRedirect(reverse("read-task", kwargs={"pk": task.pk}))

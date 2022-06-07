@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Группа{% endblock title %}
+{% block h1 %}
+    Группа
+{% endblock h1 %}
+{% block main %}
+    <p>Шифр группы: М{{ object.faculty }}{{ object.studing_form }}-
+        {{ object.course }}{{ object.number }}-{{ object.year }}</p>
+    <p><a href="{% url 'update-group' object.pk %}" class="btn btn-outline-danger btn active">Изменить</a></p>
+{% endblock main %}

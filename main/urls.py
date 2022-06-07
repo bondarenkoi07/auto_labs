@@ -1,6 +1,5 @@
 from django.urls import path
 
-
 from main.github_api import api
 from main.views.create import create
 from main.views.read import read
@@ -31,9 +30,9 @@ urlpatterns = [
     path("action/list/", read.ListActionFile.as_view(), name="list-action"),
     path("group/list/", read.ListGroup.as_view(), name="list-group"),
     # Update
-    path("subject/update/<int:pk>/", read.Subject.as_view(), name="update-subject"),
-    path("task/update/<int:pk>/", read.Task.as_view(), name="update-task"),
-    path("action/update/<int:pk>/", read.Action.as_view(), name="update-action"),
-    path("group/update/<int:pk>/", read.Group.as_view(), name="update-group"),
-    path("user/update/<int:pk>/", read.User.as_view(), name="update-user"),
+    path("subject/update/<int:pk>/", update.Subject.as_view(), name="update-subject"),
+    path("task/update/<int:pk>/", update.Task.as_view(), name="update-task"),
+    path("action/update/<int:pk>/", update.Action.as_view(), name="update-action"),
+    path("group/update/<int:pk>/", update.Group.as_view(), name="update-group"),
+    path("user/update/<int:pk>/", update.User.as_view(), name="update-user"),
 ]

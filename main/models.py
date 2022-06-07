@@ -1,7 +1,20 @@
-
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+from django.template.defaultfilters import slugify as django_slugify
+
+alphabet = {'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i',
+            'й': 'j', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't',
+            'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'shch', 'ы': 'i', 'э': 'e', 'ю': 'yu',
+            'я': 'ya'}
+
+
+def slugify(s):
+    """
+    Overriding django slugify that allows to use russian words as well.
+    """
+    return django_slugify(''.join(alphabet.get(w, w) for w in s.lower()))
 
 
 # Create your models here.
@@ -35,7 +48,6 @@ class UserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-
 class Group(models.Model):
     year = models.PositiveSmallIntegerField(verbose_name="дата создания")
     number = models.PositiveSmallIntegerField(verbose_name="номер группы")
@@ -54,6 +66,9 @@ class Group(models.Model):
         verbose_name="форма обучения",
     )
 
+    def __str__(self):
+        return "М%d%s-%d%dБ-%d" % (self.faculty, self.studing_form, self.course, self.number, self.year)
+
 
 class GitHubUser(AbstractUser):
     username = models.CharField(verbose_name="логин", unique=True, max_length=256)
@@ -67,6 +82,9 @@ class GitHubUser(AbstractUser):
     group = models.ForeignKey(
         to=Group, verbose_name="группа", on_delete=models.DO_NOTHING, default=3
     )
+
+    def __str__(self):
+        return self.username
 
     objects = UserManager()
 
@@ -93,27 +111,35 @@ class Subject(models.Model):
     )
     name = models.CharField(verbose_name="название предмета", max_length=128)
     group = models.ManyToManyField(to=Group, verbose_name="группа")
-    pass
+
+    def __str__(self):
+        return self.name
 
 
 class Action(models.Model):
     name = models.CharField(verbose_name="action name", max_length=32)
     file = models.FileField(verbose_name="action file")
 
+    def __str__(self):
+        return self.name
+
 
 class Task(models.Model):
     subject = models.ForeignKey(
-        Subject, on_delete=models.DO_NOTHING, verbose_name="задание"
+        Subject, on_delete=models.DO_NOTHING, verbose_name="Предмет"
     )
     input = models.FileField(verbose_name="Тестовый список входных параметров")
-    right_output = models.FileField(verbose_name="Тестовый список ответов")
-    name = models.CharField(verbose_name="название репозитория (англ.)", max_length=128)
+    output = models.FileField(verbose_name="Тестовый список ответов")
+    name = models.CharField(verbose_name="Название репозитория (англ.)", max_length=128)
     description = models.CharField(verbose_name="тех. задание", max_length=1023)
     actions_file = models.ForeignKey(
         Action,
         on_delete=models.DO_NOTHING,
         verbose_name="файл с настройками проверки (.yaml)",
     )
+
+    def __str__(self):
+        return self.name
 
 
 class TaskStatus(models.Model):

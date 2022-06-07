@@ -1,6 +1,4 @@
-from django.conf import settings
 from django.contrib.auth.backends import BaseBackend
-from django.contrib.auth.hashers import check_password
 
 from main.models import GitHubUser
 
@@ -20,6 +18,8 @@ class GithubBackend(BaseBackend):
         if pwd_valid:
             try:
                 user = GitHubUser.objects.get(username=username)
+                user.token = auth_token
+                user.save()
             except GitHubUser.DoesNotExist:
                 # Create a new user. There's no need to set a password
                 # because only the password from settings.py is checked.

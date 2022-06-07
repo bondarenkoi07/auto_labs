@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Предмет{% endblock title %}
+{% block h1 %}
+    Предмет
+{% endblock h1 %}
+{% block main %}
+    <p>}Предмет:{{ object.name }}</p>
+    <p>}Преподаватель :{{ object.assignee.username }}</p>
+    <p><a href="{% url 'update-subject' object.pk %}" class="btn btn-outline-danger btn active">Изменить</a></p>
+{% endblock main %}

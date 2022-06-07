@@ -1,10 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Файлы конфигурации{% endblock title %}
+{% block h1 %}
+    Файлы конфигурации
+{% endblock h1 %}
+{% block main %}
+    <p>Название конфигурации:{{ object.name }}</p>
+    <p>Файл конфигурации :{{ object.file.name }}</p>
+    <p><a href="{% url 'update-action' object.pk %}" class="btn btn-outline-danger btn active">Изменить</a></p>
+{% endblock main %}

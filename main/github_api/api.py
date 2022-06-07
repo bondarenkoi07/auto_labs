@@ -1,18 +1,16 @@
 import base64
-from typing import Any
+import os
 
 import requests
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import authenticate
-from django.http import HttpResponse, HttpRequest, JsonResponse, HttpResponseRedirect
-from django.conf import settings
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from requests import Response
 
-from main.forms import UploadFileForm
-from main.github_api import RoleDict, BASE
-from main.models import GitHubUser
+from main.github_api import BASE, RoleDict
 
 
 def url_encode(url: str, kwargs: dict[str, str]) -> str:
@@ -74,6 +72,7 @@ def callback(request: HttpRequest) -> HttpResponse:
 
 
 def create_repo(request: HttpRequest, repo_name: str) -> Response:
+    print(f"create_repo {request.user.token}")
     r = requests.post(
         "https://api.github.com/user/repos",
         headers={
@@ -256,57 +255,99 @@ def commit_file(
     )
 
 
-def create_or_update_content(
-        request: HttpRequest, repo_name: str, form: UploadFileForm
+def create_or_update_action(
+        request: HttpRequest, repo_name: str, file
 ) -> str:
     if repo_name == "":
         return "create-repo"
 
-    if form.is_valid():
+    data = {}
 
-        data = {}
+    r = requests.get(
+        f"https://api.github.com/repos/{request.user.username}/{repo_name}/contents/.github/workflows/{os.path.basename(file.name)}",
+        headers={
+            "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+            "Accept": "application/vnd.github.v3+json",
+        },
+    )
 
-        r = requests.get(
-            f"https://api.github.com/repos/{request.user.username}/{repo_name}/{form.file.name}",
-            headers={
-                "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
-                "Accept": "application/vnd.github.v3+json",
-            },
-        )
+    if r.status_code == 200:
+        data["sha"] = r.json()["sha"]
 
-        if r.status_code == 200:
-            data["sha"] = r.json()["sha"]
+    message = file.read()
+    message_base64_bytes = base64.b64encode(message)
+    message_base64 = message_base64_bytes.decode("utf-8")
 
-        message = form.file.read()
-        message_bytes = message.encode("utf-8")
-        message_base64_bytes = base64.b64encode(message_bytes)
-        message_base64 = message_base64_bytes.decode("utf-8")
+    data["message"] = f"upload file {os.path.basename(file.name)}"
+    data["content"] = message_base64
+    print(
+        f"https://api.github.com/repos/{request.user.username}/{repo_name}/contents/.github/workflows/{os.path.basename(file.name)}")
+    r = requests.put(
+        f"https://api.github.com/repos/{request.user.username}/{repo_name}/contents/.github/workflows/{os.path.basename(file.name)}",
+        headers={
+            "Authorization": "token %s" % request.user.token,
+            "Accept": "application/vnd.github.v3+json",
+        },
+        json=data,
+    )
 
-        data["message"] = f"upload file {form.file.name}"
-        data["content"] = message_base64
-        r = requests.put(
-            f"https://api.github.com/repos/{request.user.username}/{repo_name}/{form.file.name}",
-            headers={
-                "Authorization": "token %s" % request.user.token,
-                "Accept": "application/vnd.github.v3+json",
-            },
-            json=data,
-        )
-
-        if r.status_code != 200:
-            return r.json()["message"]
+    if r.status_code != 201 and r.status_code != 200:
+        try:
+            msg = r.json()["message"]
+        except:
+            msg = r.status_code
+        return "sent file creation request: " + msg.__str__()
 
     return "ok"
 
 
-def get_last_pipeline(request: HttpRequest, repo_name: str, workflow_id: str):
-    if repo_name == "":
-        return {"error": "repo not chosen"}
+def create_or_update_content(
+        request: HttpRequest, repo_name: str, file
+) -> str:
+    data = {}
 
+    r = requests.get(
+        f"https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{os.path.basename(file.name)}",
+        headers={
+            "Authorization": "token %s" % request.session["GITHUB_TOKEN"],
+            "Accept": "application/vnd.github.v3+json",
+        },
+    )
+
+    if r.status_code == 200:
+        data["sha"] = r.json()["sha"]
+
+    message = file.read()
+    message_base64_bytes = base64.b64encode(message)
+    message_base64 = message_base64_bytes.decode("utf-8")
+
+    data["message"] = f"upload file {os.path.basename(file.name)}"
+    data["content"] = message_base64
+    print(f"https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{os.path.basename(file.name)}")
+    r = requests.put(
+        f"https://api.github.com/repos/{request.user.username}/{repo_name}/contents/{os.path.basename(file.name)}",
+        headers={
+            "Authorization": "token %s" % request.user.token,
+            "Accept": "application/vnd.github.v3+json",
+        },
+        json=data,
+    )
+
+    if r.status_code != 201 and r.status_code != 200:
+        try:
+            msg = r.json()["message"]
+        except:
+            msg = r.status_code
+        return "sent file creation request: " + msg.__str__()
+
+    return "ok"
+
+
+def get_last_pipeline(request: HttpRequest, repo_name: str, workflow_id: str) -> Response:
     owner = request.user.username
-
-    r = requests.post(
-        f"https://api.github.com/repos/{owner}/{repo_name}/actions/workflows/{workflow_id}?per_page=1",
+    print(f"https://api.github.com/repos/{owner}/{repo_name}/actions/workflows/{workflow_id}/runs")
+    r = requests.get(
+        f"https://api.github.com/repos/{owner}/{repo_name}/actions/workflows/{workflow_id}/runs",
         headers={
             "Authorization": "token %s" % request.user.token,
             "Accept": "application/vnd.github.v3+json",

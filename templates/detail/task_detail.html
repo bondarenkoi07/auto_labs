@@ -1,23 +1,33 @@
 {% extends 'base.html' %}
-{% block main%}
+{% block main %}
     <div>
         <h2>{{ object.name }}</h2>
         <p>Задание: {{ object.description }}</p>
-        <p>
-        Статус: {%  if status == "" %}
-            {{ status }}
-        {% else %}
-            нет данных
-        {% endif %}
-        </p>
-        {% if not form is None %}
-            <p> Загрузить:</p>
-            <form method="post" action="{% url 'send-file' object.pk %}" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input type="submit" value="Отправить" class=" btn btn-outline-primary active"/>
-            </form>
-        {% endif %}
+    </div>
+
+    <p>
+        Статус:{% if conclusion is not None %}
+        {{ conclusion }}
+    {% elif status is not None %}
+        {{ status }}
+    {% else %}
+        нет данных
+    {% endif %}
+    </p>
+
+
+    {% if not form is None %}
+        <p> Загрузить:</p>
+        <form method="post" action="{% url 'send-file' object.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Отправить" class=" btn btn-outline-primary active"/>
+        </form>
+    {% endif %}
+    <div class="btn-group pt-5" role="group" aria-label="Basic example">
+        <a href="{% url 'update-task' task.pk %}" class="btn btn-outline-primary btn active">
+            Изменить задание
+        </a>
     </div>
 {% endblock main %}
 {% block error %}
